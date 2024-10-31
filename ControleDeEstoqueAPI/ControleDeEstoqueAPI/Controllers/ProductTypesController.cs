@@ -1,6 +1,7 @@
 ﻿using ControleDeEstoqueAPI.Data;
 using ControleDeEstoqueAPI.Data.DTOs.Brand;
 using ControleDeEstoqueAPI.Data.DTOs.Product;
+using ControleDeEstoqueAPI.Data.DTOs.ProductType;
 using ControleDeEstoqueAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,65 +10,61 @@ using System.Threading.Tasks;
 
 namespace ControleDeEstoqueAPI.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductTypesController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public ProductsController(AppDbContext context)
+        public ProductTypesController(AppDbContext context)
         {
             _context = context;
         }
 
-        [HttpGet("VerProdutos")]
+        [HttpGet]
         public IActionResult GetAll() =>
-            Ok(_context.Products.ToList());
+            Ok(_context.ProductTypes.ToList());
 
-        [HttpGet("BuscarProduto/{id}")]
+        [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var product = _context.Products.Find(id);
+            var product = _context.ProductTypes.Find(id);
             return product == null ? NotFound() : Ok(product);
         }
 
-        [HttpPost("AdicionarProduto")]
-        public async Task<IActionResult> Create([FromBody] ProductDTO productDto)
+        [HttpPost("AdicionarTipoDeProduto")]
+        public async Task<IActionResult> Create([FromBody] ProductTypeDTO productTypeDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var product = new Product
+            var productType = new ProductType
             {
-                Name = productDto.Name,
-                Price = productDto.Price,
-                BrandId = productDto.BrandId,
-                ProductTypeId = productDto.ProductTypeId
+                Name = productTypeDto.Name
             };
 
-            _context.Products.Add(product);
+            _context.ProductTypes.Add(productType);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = product.ProductId }, product);
+            return CreatedAtAction(nameof(GetById), new { id = productType.ProductTypeId }, productType);
         }
 
-        [HttpPut("AlterarProduto/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ProductDTO productDto)
+        [HttpPut("AlterarTipoDeProduto/{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] ProductTypeDTO productTypeDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var productType = await _context.ProductTypes.FindAsync(id);
+            if (productType == null)
             {
                 return NotFound();
             }
 
-            product.Name = productDto.Name;
+            productType.Name = productTypeDto.Name;
 
             try
             {
@@ -75,7 +72,7 @@ namespace ControleDeEstoqueAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Products.Any(e => e.ProductId == id))
+                if (!_context.ProductTypes.Any(e => e.ProductTypeId == id))
                 {
                     return NotFound();
                 }
@@ -88,16 +85,15 @@ namespace ControleDeEstoqueAPI.Controllers
             return NoContent();
         }
 
-        [HttpDelete("DeletarProduto/{id}")]
+        [HttpDelete("DeletarTipoDeProduto/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var product = _context.Products.Find(id);
-            if (product == null) return NotFound();
+            var productType = _context.ProductTypes.Find(id);
+            if (productType == null) return NotFound();
 
-            _context.Products.Remove(product);
+            _context.ProductTypes.Remove(productType);
             await _context.SaveChangesAsync();
             return NoContent();
         }
     }
-
 }

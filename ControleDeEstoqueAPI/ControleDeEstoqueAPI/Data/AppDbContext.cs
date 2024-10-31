@@ -5,6 +5,11 @@ namespace ControleDeEstoqueAPI.Data
 {
     public class AppDbContext : DbContext
     {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options) // Passa as opções para a classe base DbContext
+        {
+        }
+
         public DbSet<Client> Clients { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderProduct> OrderProducts { get; set; }
@@ -27,6 +32,27 @@ namespace ControleDeEstoqueAPI.Data
 
             modelBuilder.Entity<ProductDescription>()
                 .HasKey(pd => pd.ProductId);
+
+            // Definindo a precisão dos campos decimais, 18 dígitos no total, 2 casas decimais
+            modelBuilder.Entity<OrderProduct>()
+                .Property(op => op.UnitPrice)
+                .HasPrecision(18, 2); 
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<PaymentHistory>()
+                .Property(ph => ph.NewAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<PaymentHistory>()
+                .Property(ph => ph.PreviousAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Price)
+                .HasPrecision(18, 2);
 
             base.OnModelCreating(modelBuilder);
         }
