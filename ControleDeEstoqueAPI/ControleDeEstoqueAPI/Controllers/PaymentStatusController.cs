@@ -1,5 +1,6 @@
 ﻿using ControleDeEstoqueAPI.Data;
 using ControleDeEstoqueAPI.Data.DTOs.Brand;
+using ControleDeEstoqueAPI.Data.DTOs.PaymentStatus;
 using ControleDeEstoqueAPI.Data.DTOs.Product;
 using ControleDeEstoqueAPI.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -12,65 +13,59 @@ namespace ControleDeEstoqueAPI.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class PaymentsStatusController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public ProductsController(AppDbContext context)
+        public PaymentsStatusController(AppDbContext context)
         {
             _context = context;
         }
 
-        [HttpGet("VerProdutos")]
+        [HttpGet("VerStatusDePagamento")]
         public IActionResult GetAll() =>
-            Ok(_context.Products.ToList());
+            Ok(_context.PaymentStatuses.ToList());
 
-        [HttpGet("BuscarProduto/{id}")]
+        [HttpGet("BuscarStatusDePagamento/{id}")]
         public IActionResult GetById(int id)
         {
-            var product = _context.Products.Find(id);
-            return product == null ? NotFound() : Ok(product);
+            var paymentStatus = _context.PaymentStatuses.Find(id);
+            return paymentStatus == null ? NotFound() : Ok(paymentStatus);
         }
 
-        [HttpPost("AdicionarProduto")]
-        public async Task<IActionResult> Create([FromBody] ProductDTO productDto)
+        [HttpPost("AdicionarStatusDePagamento")]
+        public async Task<IActionResult> Create([FromBody] PaymentStatusDTO paymentStatusDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var product = new Product
+            var paymentStatus = new PaymentStatus
             {
-                Name = productDto.Name,
-                Price = productDto.Price,
-                BrandId = productDto.BrandId,
-                ProductTypeId = productDto.ProductTypeId
+                Name = paymentStatusDto.Name
             };
 
-            _context.Products.Add(product);
+            _context.PaymentStatuses.Add(paymentStatus);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = product.ProductId }, product);
+            return CreatedAtAction(nameof(GetById), new { id = paymentStatus.PaymentStatusId }, paymentStatus);
         }
 
-        [HttpPut("AlterarProduto/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ProductDTO productDto)
+        [HttpPut("AlterarStatusDePagamento/{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] PaymentStatusDTO paymentStatusDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var paymentStatus = await _context.PaymentStatuses.FindAsync(id);
+            if (paymentStatus == null)
             {
                 return NotFound();
             }
 
-            product.Name = productDto.Name;
-            product.Price = productDto.Price;  
-            product.BrandId = productDto.BrandId;
-            product.ProductTypeId = productDto.ProductTypeId;
+            paymentStatus.Name = paymentStatusDto.Name;
 
             try
             {
@@ -78,7 +73,7 @@ namespace ControleDeEstoqueAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Products.Any(e => e.ProductId == id))
+                if (!_context.PaymentStatuses.Any(e => e.PaymentStatusId == id))
                 {
                     return NotFound();
                 }
@@ -91,13 +86,13 @@ namespace ControleDeEstoqueAPI.Controllers
             return NoContent();
         }
 
-        [HttpDelete("DeletarProduto/{id}")]
+        [HttpDelete("DeletarStatusDePagamento/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var product = _context.Products.Find(id);
-            if (product == null) return NotFound();
+            var paymentStatus = _context.PaymentStatuses.Find(id);
+            if (paymentStatus == null) return NotFound();
 
-            _context.Products.Remove(product);
+            _context.PaymentStatuses.Remove(paymentStatus);
             await _context.SaveChangesAsync();
             return NoContent();
         }

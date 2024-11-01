@@ -1,6 +1,8 @@
 ﻿using ControleDeEstoqueAPI.Data;
 using ControleDeEstoqueAPI.Data.DTOs.Brand;
+using ControleDeEstoqueAPI.Data.DTOs.Clients;
 using ControleDeEstoqueAPI.Data.DTOs.Product;
+using ControleDeEstoqueAPI.Data.DTOs.ProductType;
 using ControleDeEstoqueAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,68 +11,63 @@ using System.Threading.Tasks;
 
 namespace ControleDeEstoqueAPI.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class ClientsController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public ProductsController(AppDbContext context)
+        public ClientsController(AppDbContext context)
         {
             _context = context;
         }
 
-        [HttpGet("VerProdutos")]
+        [HttpGet]
         public IActionResult GetAll() =>
-            Ok(_context.Products.ToList());
+            Ok(_context.Clients.ToList());
 
-        [HttpGet("BuscarProduto/{id}")]
+        [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var product = _context.Products.Find(id);
-            return product == null ? NotFound() : Ok(product);
+            var client = _context.Clients.Find(id);
+            return client == null ? NotFound() : Ok(client);
         }
 
-        [HttpPost("AdicionarProduto")]
-        public async Task<IActionResult> Create([FromBody] ProductDTO productDto)
+        [HttpPost("AdicionarCliente")]
+        public async Task<IActionResult> Create([FromBody] ClientDTO clientsDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var product = new Product
+            var client = new Client
             {
-                Name = productDto.Name,
-                Price = productDto.Price,
-                BrandId = productDto.BrandId,
-                ProductTypeId = productDto.ProductTypeId
+                Name = clientsDto.Name,
+                Email = clientsDto.Email
             };
 
-            _context.Products.Add(product);
+            _context.Clients.Add(client);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = product.ProductId }, product);
+            return CreatedAtAction(nameof(GetById), new { id = client.ClientId }, client);
         }
 
-        [HttpPut("AlterarProduto/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ProductDTO productDto)
+        [HttpPut("AlterarCliente/{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] ClientDTO clientsDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var client = await _context.Clients.FindAsync(id);
+            if (client == null)
             {
                 return NotFound();
             }
 
-            product.Name = productDto.Name;
-            product.Price = productDto.Price;  
-            product.BrandId = productDto.BrandId;
-            product.ProductTypeId = productDto.ProductTypeId;
+            client.Name = clientsDto.Name;
+            client.Email = clientsDto.Email;
 
             try
             {
@@ -78,7 +75,7 @@ namespace ControleDeEstoqueAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Products.Any(e => e.ProductId == id))
+                if (!_context.Clients.Any(e => e.ClientId == id))
                 {
                     return NotFound();
                 }
@@ -91,16 +88,15 @@ namespace ControleDeEstoqueAPI.Controllers
             return NoContent();
         }
 
-        [HttpDelete("DeletarProduto/{id}")]
+        [HttpDelete("DeletarCliente/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var product = _context.Products.Find(id);
-            if (product == null) return NotFound();
+            var client = _context.Clients.Find(id);
+            if (client == null) return NotFound();
 
-            _context.Products.Remove(product);
+            _context.Clients.Remove(client);
             await _context.SaveChangesAsync();
             return NoContent();
         }
     }
-
 }

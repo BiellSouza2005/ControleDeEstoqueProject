@@ -4,6 +4,7 @@ using ControleDeEstoqueAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ControleDeEstoqueAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241031163653_AddDescriptionIDToProductDescription")]
+    partial class AddDescriptionIDToProductDescription
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,14 +77,9 @@ namespace ControleDeEstoqueAPI.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PaymentStatusId")
-                        .HasColumnType("int");
-
                     b.HasKey("OrderId");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("PaymentStatusId");
 
                     b.ToTable("Orders");
                 });
@@ -92,9 +90,6 @@ namespace ControleDeEstoqueAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("PaymentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderPaymentId")
                         .HasColumnType("int");
 
                     b.HasKey("OrderId", "PaymentId");
@@ -110,9 +105,6 @@ namespace ControleDeEstoqueAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderProductId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -144,7 +136,7 @@ namespace ControleDeEstoqueAPI.Migrations
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("PaymentStatusId")
+                    b.Property<int>("PaymentStatusId")
                         .HasColumnType("int");
 
                     b.HasKey("PaymentId");
@@ -276,15 +268,7 @@ namespace ControleDeEstoqueAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ControleDeEstoqueAPI.Models.PaymentStatus", "PaymentStatus")
-                        .WithMany()
-                        .HasForeignKey("PaymentStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Client");
-
-                    b.Navigation("PaymentStatus");
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.OrderPayment", b =>
@@ -327,9 +311,13 @@ namespace ControleDeEstoqueAPI.Migrations
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.Payment", b =>
                 {
-                    b.HasOne("ControleDeEstoqueAPI.Models.PaymentStatus", null)
+                    b.HasOne("ControleDeEstoqueAPI.Models.PaymentStatus", "PaymentStatus")
                         .WithMany("Payments")
-                        .HasForeignKey("PaymentStatusId");
+                        .HasForeignKey("PaymentStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PaymentStatus");
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.PaymentHistory", b =>

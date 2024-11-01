@@ -5,9 +5,7 @@
         public int PaymentId { get; set; }
         public decimal Amount { get; set; }
         public DateTime PaymentDate { get; set; }
-        public int PaymentStatusId { get; set; }
 
-        public PaymentStatus PaymentStatus { get; set; }
         public ICollection<OrderPayment> OrderPayments { get; set; }
         public ICollection<PaymentHistory> PaymentHistories { get; set; }
     }
