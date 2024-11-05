@@ -91,6 +91,37 @@ namespace ControleDeEstoqueAPI.Controllers
             return NoContent();
         }
 
+        [HttpPut("AdicionarQuantidade/{id}/{quantidade}")]
+        public async Task<IActionResult> AddQuantity(int id, int quantidade)
+        {
+            var product = await _context.Products.FindAsync(id);
+
+            if (product == null) return NotFound("Produto não encontrado.");
+
+            product.Quantity += quantidade;
+            await _context.SaveChangesAsync();
+
+            return Ok(product);
+        }
+
+        [HttpPut("SubtrairQuantidade/{id}/{quantidade}")]
+        public async Task<IActionResult> SubtractQuantity(int id, int quantidade)
+        {
+            var product = await _context.Products.FindAsync(id);
+
+            if (product == null) return NotFound("Produto não encontrado.");
+
+            if (product.Quantity < quantidade)
+            {
+                return BadRequest("Quantidade insuficiente no estoque.");
+            }
+
+            product.Quantity -= quantidade;
+            await _context.SaveChangesAsync();
+
+            return Ok(product);
+        }
+
         [HttpDelete("DeletarProduto/{id}")]
         public async Task<IActionResult> Delete(int id)
         {

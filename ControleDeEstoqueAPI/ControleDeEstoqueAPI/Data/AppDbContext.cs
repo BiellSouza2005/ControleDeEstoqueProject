@@ -21,6 +21,9 @@ namespace ControleDeEstoqueAPI.Data
         public DbSet<OrderPayment> OrderPayments { get; set; }
         public DbSet<PaymentHistory> PaymentHistories { get; set; }
         public DbSet<PaymentStatus> PaymentStatuses { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Login> Logins { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
