@@ -4,7 +4,7 @@ using ControleDeEstoqueAPI.Data.DTOs.Login;
 using ControleDeEstoqueAPI.Data.DTOs.Product;
 using ControleDeEstoqueAPI.Data.DTOs.ProductType;
 using ControleDeEstoqueAPI.Data.DTOs.User;
-using ControleDeEstoqueAPI.Models;
+using ControleDeEstoqueAPI.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;

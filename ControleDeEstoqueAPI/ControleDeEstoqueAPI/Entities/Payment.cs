@@ -1,4 +1,4 @@
-﻿namespace ControleDeEstoqueAPI.Models
+﻿namespace ControleDeEstoqueAPI.Entities
 {
     public class Payment
     {

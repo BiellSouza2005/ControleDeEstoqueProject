@@ -1,4 +1,4 @@
-﻿namespace ControleDeEstoqueAPI.Models
+﻿namespace ControleDeEstoqueAPI.Entities
 {
     using System.Collections.Generic;
 

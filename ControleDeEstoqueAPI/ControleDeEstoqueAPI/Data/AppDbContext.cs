@@ -1,4 +1,5 @@
-﻿using ControleDeEstoqueAPI.Models;
+﻿using ControleDeEstoqueAPI.Entities;
+using ControleDeEstoqueAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ControleDeEstoqueAPI.Data

@@ -3,7 +3,7 @@ using ControleDeEstoqueAPI.Data.DTOs.Brand;
 using ControleDeEstoqueAPI.Data.DTOs.Clients;
 using ControleDeEstoqueAPI.Data.DTOs.Product;
 using ControleDeEstoqueAPI.Data.DTOs.ProductType;
-using ControleDeEstoqueAPI.Models;
+using ControleDeEstoqueAPI.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;

@@ -1,4 +1,6 @@
-﻿namespace ControleDeEstoqueAPI.Models
+﻿using ControleDeEstoqueAPI.Entities;
+
+namespace ControleDeEstoqueAPI.Entities
 {
     public class Client
     {
