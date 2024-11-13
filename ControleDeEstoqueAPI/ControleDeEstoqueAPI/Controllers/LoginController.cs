@@ -22,7 +22,7 @@ namespace ControleDeEstoqueAPI.Controllers
                 _context = context;
             }
 
-            [HttpPost("Login")]
+            [HttpPost("LoginUsuario")]
             public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
             {
                 // Verifica se existe um usuário com o email fornecido

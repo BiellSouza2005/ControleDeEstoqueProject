@@ -1,5 +1,6 @@
 ﻿using ControleDeEstoqueAPI.Data;
 using ControleDeEstoqueAPI.Data.DTOs.Brand;
+using ControleDeEstoqueAPI.Data.DTOs.Login;
 using ControleDeEstoqueAPI.Data.DTOs.Product;
 using ControleDeEstoqueAPI.Data.DTOs.ProductType;
 using ControleDeEstoqueAPI.Data.DTOs.User;
@@ -57,7 +58,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("AdicionarUsuario")]
-    public async Task<IActionResult> AddUser(UserDTO userDto)
+    public async Task<IActionResult> AddUser(UserRegistrationDTO userDto)
     {
         var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
         if (existingUser != null)
@@ -117,4 +118,19 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("LoginUsuario")]
+    public async Task<IActionResult> Login([FromBody] UserLoginDTO loginDto)
+    {
+        // Verifica se existe um usuário com o email fornecido
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+
+        // Se o usuário não for encontrado ou a senha estiver incorreta
+        if (user == null || user.Password != loginDto.Password)
+        {
+            return BadRequest("Usuário ou senha incorretos.");
+        }
+
+        // Se estiver tudo certo, retornar o token de acesso e uma mensagem de sucesso
+        return Ok(new { mensagem = "Login realizado com sucesso!", token = Guid.NewGuid(), user });
+    }
 }
