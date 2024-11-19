@@ -31,21 +31,31 @@ namespace ControleDeEstoqueAPI.Controllers
         }
 
         [HttpPost("AdicionaMarca")]
-        public async Task<IActionResult> Create([FromBody] BrandDTO brandDto)
+        public async Task<IActionResult> AdicionaMarca([FromBody] BrandDTO brandDto, [FromHeader(Name = "User-Inclusion")] string userInclusion)
         {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrEmpty(brandDto.Name))
             {
-                return BadRequest(ModelState);
+                return BadRequest("O nome da marca é obrigatório.");
+            }
+
+            var existingBrand = _context.Brands.FirstOrDefault(b => b.Name == brandDto.Name);
+            if (existingBrand != null)
+            {
+                return Conflict("A marca já existe.");
             }
 
             var brand = new Brand
             {
-                Name = brandDto.Name
+                Name = brandDto.Name,
+                DateTimeInclusion = DateTime.UtcNow,
+                UserInclusion = userInclusion,
+                IsActive = true
             };
 
             _context.Brands.Add(brand);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = brand.BrandId }, brand);
+
+            return CreatedAtAction(nameof(AdicionaMarca), new { id = brand.Id }, brand);
         }
 
         [HttpPut("MudaMarca/{id}")]

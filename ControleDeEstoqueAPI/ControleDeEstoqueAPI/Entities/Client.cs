@@ -1,13 +1,14 @@
-﻿using ControleDeEstoqueAPI.Entities;
-
-namespace ControleDeEstoqueAPI.Entities
+﻿namespace ControleDeEstoqueAPI.Entities
 {
-    public class Client
+    public class Client : Entity<int>
     {
-        public int ClientId { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
-
+        public DateTime DateTimeInclusion { get; set; }
+        public string UserInclusion { get; set; }
+        public DateTime DateTimeChange { get; set; }
+        public string UserChange { get; set; }
+        public bool IsActive { get; set; }
         public ICollection<Order> Orders { get; set; }
     }
 }

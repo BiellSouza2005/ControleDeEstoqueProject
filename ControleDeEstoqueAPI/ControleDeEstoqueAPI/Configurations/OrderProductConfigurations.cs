@@ -1,0 +1,36 @@
+﻿using ControleDeEstoqueAPI.Entities;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore;
+
+namespace ControleDeEstoqueAPI.Configurations
+{
+    public class OrderProductConfigurations : IEntityTypeConfiguration<OrderProduct>
+    {
+        public void Configure(EntityTypeBuilder<OrderProduct> builder)
+        {
+            builder.HasKey(c => new { c.OrderId, c.ProductId });
+
+            builder.Property(c=> c.UnitPrice)
+                .HasPrecision(18, 2);
+
+            builder.Property(c => c.DateTimeInclusion)
+                   .IsRequired()
+                   .HasDefaultValueSql("GETDATE()");
+
+            builder.Property(c => c.UserInclusion)
+                   .IsRequired()
+                   .HasMaxLength(80);
+
+            builder.Property(c => c.DateTimeChange)
+                   .IsRequired();
+
+            builder.Property(c => c.UserChange)
+                   .HasMaxLength(80);
+
+            builder.Property(c => c.IsActive)
+                   .IsRequired()
+                   .HasDefaultValue(true);
+
+        }
+    }
+}

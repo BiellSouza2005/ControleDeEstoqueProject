@@ -36,7 +36,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasKey("BrandId");
 
-                    b.ToTable("Brands");
+                    b.ToTable("Brands", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.Client", b =>
@@ -57,7 +57,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasKey("ClientId");
 
-                    b.ToTable("Clients");
+                    b.ToTable("Clients", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.Login", b =>
@@ -78,7 +78,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasKey("LoginId");
 
-                    b.ToTable("Logins");
+                    b.ToTable("Logins", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.Order", b =>
@@ -104,7 +104,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasIndex("PaymentStatusId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.OrderPayment", b =>
@@ -122,7 +122,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("OrderPayments");
+                    b.ToTable("OrderPayments", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.OrderProduct", b =>
@@ -147,7 +147,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderProducts");
+                    b.ToTable("OrderProducts", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.Payment", b =>
@@ -172,7 +172,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasIndex("PaymentStatusId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.PaymentHistory", b =>
@@ -201,7 +201,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("PaymentHistories");
+                    b.ToTable("PaymentHistories", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.PaymentStatus", b =>
@@ -218,7 +218,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasKey("PaymentStatusId");
 
-                    b.ToTable("PaymentStatuses");
+                    b.ToTable("PaymentStatuses", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.Product", b =>
@@ -252,7 +252,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasIndex("ProductTypeId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.ProductDescription", b =>
@@ -269,7 +269,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("ProductDescriptions");
+                    b.ToTable("ProductDescriptions", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.ProductType", b =>
@@ -286,7 +286,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasKey("ProductTypeId");
 
-                    b.ToTable("ProductTypes");
+                    b.ToTable("ProductTypes", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.User", b =>
@@ -311,7 +311,7 @@ namespace ControleDeEstoqueAPI.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Models.Order", b =>

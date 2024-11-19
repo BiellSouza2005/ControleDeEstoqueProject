@@ -1,10 +1,14 @@
 ﻿namespace ControleDeEstoqueAPI.Entities
 {
-    public class ProductDescription
+    public class ProductDescription : Entity<int>
     {
-        public int DescriptionID { get; set; }
         public int ProductId { get; set; }
         public string Description { get; set; }
+        public DateTime DateTimeInclusion { get; set; }
+        public string UserInclusion { get; set; }
+        public DateTime DateTimeChange { get; set; }
+        public string UserChange { get; set; }
+        public bool IsActive { get; set; }
 
         public Product Product { get; set; }
     }
