@@ -33,7 +33,7 @@ namespace ControleDeEstoqueAPI.Controllers
         }
 
         [HttpPost("AdicionarProduto")]
-        public async Task<IActionResult> Create([FromBody] ProductDTO productDto)
+        public async Task<IActionResult> Create([FromBody] ProductDTO productDto, [FromHeader(Name = "User-Inclusion")] string userInclusion)
         {
             if (!ModelState.IsValid)
             {
@@ -45,12 +45,15 @@ namespace ControleDeEstoqueAPI.Controllers
                 Name = productDto.Name,
                 Price = productDto.Price,
                 BrandId = productDto.BrandId,
-                ProductTypeId = productDto.ProductTypeId
+                ProductTypeId = productDto.ProductTypeId,
+                UserInclusion = userInclusion,
+                UserChange = userInclusion,
+                
             };
 
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = product.ProductId }, product);
+            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
         }
 
         [HttpPut("AlterarProduto/{id}")]
@@ -78,7 +81,7 @@ namespace ControleDeEstoqueAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Products.Any(e => e.ProductId == id))
+                if (!_context.Products.Any(e => e.Id == id))
                 {
                     return NotFound();
                 }

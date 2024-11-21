@@ -10,7 +10,7 @@
         public DateTime DateTimeChange { get; set; }
         public string UserChange { get; set; }
         public bool IsActive { get; set; }
-        public Order Order { get; set; }
+        public int OrderId { get; set; }
         public Product Product { get; set; }
     }
 

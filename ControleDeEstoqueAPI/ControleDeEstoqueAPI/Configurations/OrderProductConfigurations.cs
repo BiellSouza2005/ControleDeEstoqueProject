@@ -8,7 +8,10 @@ namespace ControleDeEstoqueAPI.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderProduct> builder)
         {
+            builder.Property(e => e.Id).ValueGeneratedOnAdd();
+
             builder.HasKey(c => new { c.OrderId, c.ProductId });
+
 
             builder.Property(c=> c.UnitPrice)
                 .HasPrecision(18, 2);

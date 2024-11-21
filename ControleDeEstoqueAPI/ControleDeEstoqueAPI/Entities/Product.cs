@@ -17,7 +17,6 @@ namespace ControleDeEstoqueAPI.Entities
 
             public Brand Brand { get; set; }
             public ProductType ProductType { get; set; }
-            public ICollection<OrderProduct> OrderProducts { get; set; }
             public ProductDescription ProductDescription { get; set; }
     }
 }

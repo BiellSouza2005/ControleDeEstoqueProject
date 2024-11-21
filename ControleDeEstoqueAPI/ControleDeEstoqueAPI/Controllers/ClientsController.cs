@@ -23,18 +23,18 @@ namespace ControleDeEstoqueAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll() =>
+        public IActionResult GetAll([FromHeader(Name = "User-Inclusion")] string userInclusion) =>
             Ok(_context.Clients.ToList());
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public IActionResult GetById(int id, [FromHeader(Name = "User-Inclusion")] string userInclusion)
         {
             var client = _context.Clients.Find(id);
             return client == null ? NotFound() : Ok(client);
         }
 
         [HttpPost("AdicionarCliente")]
-        public async Task<IActionResult> Create([FromBody] ClientDTO clientsDto)
+        public async Task<IActionResult> Create([FromBody] ClientDTO clientsDto, [FromHeader(Name = "User-Inclusion")] string userInclusion)
         {
             if (!ModelState.IsValid)
             {
@@ -44,16 +44,18 @@ namespace ControleDeEstoqueAPI.Controllers
             var client = new Client
             {
                 Name = clientsDto.Name,
-                Email = clientsDto.Email
+                Email = clientsDto.Email,
+                UserInclusion = userInclusion,
+                UserChange = userInclusion
             };
 
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = client.ClientId }, client);
+            return CreatedAtAction(nameof(GetById), new { id = client.Id }, client);
         }
 
         [HttpPut("AlterarCliente/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ClientDTO clientsDto)
+        public async Task<IActionResult> Update(int id, [FromBody] ClientDTO clientsDto, [FromHeader(Name = "User-Inclusion")] string userInclusion)
         {
             if (!ModelState.IsValid)
             {
@@ -75,7 +77,7 @@ namespace ControleDeEstoqueAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Clients.Any(e => e.ClientId == id))
+                if (!_context.Clients.Any(e => e.Id == id))
                 {
                     return NotFound();
                 }
@@ -89,7 +91,7 @@ namespace ControleDeEstoqueAPI.Controllers
         }
 
         [HttpDelete("DeletarCliente/{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, [FromHeader(Name = "User-Inclusion")] string userInclusion)
         {
             var client = _context.Clients.Find(id);
             if (client == null) return NotFound();

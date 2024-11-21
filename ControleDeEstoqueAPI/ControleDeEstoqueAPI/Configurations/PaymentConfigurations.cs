@@ -8,7 +8,9 @@ namespace ControleDeEstoqueAPI.Configurations
     {
         public void Configure(EntityTypeBuilder<Payment> builder)
         {
-            builder.HasKey(c => c.Id);
+            builder.Property(e => e.Id).ValueGeneratedOnAdd();
+
+            builder.HasKey(c => new { c.OrderId, c.Id });
 
             builder.Property(p => p.Amount)
                 .HasPrecision(18, 2);

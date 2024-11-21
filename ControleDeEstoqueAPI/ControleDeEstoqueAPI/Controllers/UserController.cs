@@ -32,7 +32,7 @@ public class UserController : ControllerBase
 
         var userDto = new UserDTO
         {
-            UserId = user.UserId,
+            UserId = user.Id,
             Name = user.Name,
             Email = user.Email,
             Password = user.Password
@@ -47,7 +47,7 @@ public class UserController : ControllerBase
         var users = await _context.Users
             .Select(u => new UserDTO
             {
-                UserId = u.UserId,
+                UserId = u.Id,
                 Name = u.Name,
                 Email = u.Email,
                 Password = u.Password
@@ -76,7 +76,7 @@ public class UserController : ControllerBase
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetUserById), new { id = user.UserId }, userDto);
+        return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, userDto);
     }
 
     [HttpPut("AtualizarUsuario/{id}")]

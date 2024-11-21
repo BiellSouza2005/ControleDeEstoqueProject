@@ -8,6 +8,8 @@ namespace ControleDeEstoqueAPI.Configurations
     {
         public void Configure(EntityTypeBuilder<Client> builder)
         {
+            builder.Property(e => e.Id).ValueGeneratedOnAdd();
+
             builder.HasKey(c => c.Id);
 
             builder.Property(c => c.DateTimeInclusion)

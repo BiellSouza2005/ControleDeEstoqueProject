@@ -10,6 +10,5 @@
         public string UserChange { get; set; }
         public bool IsActive { get; set; }
 
-        public Product Product { get; set; }
     }
 }

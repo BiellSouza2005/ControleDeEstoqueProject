@@ -8,7 +8,7 @@ namespace ControleDeEstoqueAPI.Configurations
     {
         public void Configure(EntityTypeBuilder<ProductDescription> builder)
         {
-            builder.HasKey(c => c.ProductId);
+            builder.Property(e => e.Id).ValueGeneratedOnAdd();
 
             builder.Property(c => c.DateTimeInclusion)
                    .IsRequired()

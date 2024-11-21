@@ -54,7 +54,7 @@ namespace ControleDeEstoqueAPI.Controllers
 
             _context.PaymentHistories.Add(paymentHistories);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = paymentHistories.PaymentHistoryId }, paymentHistories);
+            return CreatedAtAction(nameof(GetById), new { id = paymentHistories.Id }, paymentHistories);
         }
 
         [HttpPut("AlterarHistoricoDePagamento/{id}")]
@@ -82,7 +82,7 @@ namespace ControleDeEstoqueAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.PaymentHistories.Any(e => e.PaymentHistoryId == id))
+                if (!_context.PaymentHistories.Any(e => e.Id == id))
                 {
                     return NotFound();
                 }

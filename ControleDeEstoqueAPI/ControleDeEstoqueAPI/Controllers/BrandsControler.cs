@@ -1,7 +1,6 @@
 ﻿using ControleDeEstoqueAPI.Data;
 using ControleDeEstoqueAPI.Data.DTOs.Brand;
 using ControleDeEstoqueAPI.Entities;
-using ControleDeEstoqueAPI.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,9 +46,8 @@ namespace ControleDeEstoqueAPI.Controllers
             var brand = new Brand
             {
                 Name = brandDto.Name,
-                DateTimeInclusion = DateTime.UtcNow,
                 UserInclusion = userInclusion,
-                IsActive = true
+                UserChange = userInclusion
             };
 
             _context.Brands.Add(brand);
@@ -80,7 +78,7 @@ namespace ControleDeEstoqueAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Brands.Any(e => e.BrandId == id))
+                if (!_context.Brands.Any(e => e.Id == id))
                 {
                     return NotFound();
                 }

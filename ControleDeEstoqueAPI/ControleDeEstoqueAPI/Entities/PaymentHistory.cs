@@ -12,6 +12,5 @@
         public string UserChange { get; set; }
         public bool IsActive { get; set; }
 
-        public Payment Payment { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using ControleDeEstoqueAPI.Entities;
+﻿using ControleDeEstoqueAPI.Configurations;
+using ControleDeEstoqueAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ControleDeEstoqueAPI.Data
@@ -19,14 +20,22 @@ namespace ControleDeEstoqueAPI.Data
         public DbSet<ProductDescription> ProductDescriptions { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PaymentHistory> PaymentHistories { get; set; }
-        public DbSet<PaymentStatus> PaymentStatuses { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Login> Logins { get; set; }
 
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{ 
-        //    base.OnModelCreating(modelBuilder);
-        //}
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new BrandConfiguration());
+            modelBuilder.ApplyConfiguration(new ClientConfigurations());
+            modelBuilder.ApplyConfiguration(new OrderConfigurations());
+            modelBuilder.ApplyConfiguration(new OrderProductConfigurations());
+            modelBuilder.ApplyConfiguration(new PaymentConfigurations());
+            modelBuilder.ApplyConfiguration(new PaymentHistoryConfigurations());
+            modelBuilder.ApplyConfiguration(new ProductConfigurations());
+            modelBuilder.ApplyConfiguration(new ProductDescriptionConfigurations());
+            modelBuilder.ApplyConfiguration(new ProductTypeConfigurations());
+            modelBuilder.ApplyConfiguration(new UserConfigurations());
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ControleDeEstoqueAPI.Data;
 using ControleDeEstoqueAPI.Data.DTOs.Brand;
 using ControleDeEstoqueAPI.Data.DTOs.Order;
+using ControleDeEstoqueAPI.Data.DTOs.OrderProduct;
 using ControleDeEstoqueAPI.Data.DTOs.Payment;
 using ControleDeEstoqueAPI.Data.DTOs.Product;
 using ControleDeEstoqueAPI.Data.DTOs.ProductDescription;
@@ -25,8 +26,14 @@ namespace ControleDeEstoqueAPI.Controllers
         }
 
         [HttpGet("VerPedidos")]
-        public IActionResult GetAll() =>
-            Ok(_context.Orders.ToList());
+        public IActionResult GetAll() {
+            var orders = _context.Orders
+                .Include(op => op.OrderProducts)
+                    .ThenInclude(pr => pr.Product)
+                .Include(p => p.Payments).ToList();
+
+            return orders == null ? NotFound() : Ok(orders);
+        }
 
         [HttpGet("BuscarPedido/{id}")]
         public IActionResult GetById(int id)
@@ -36,23 +43,56 @@ namespace ControleDeEstoqueAPI.Controllers
         }
 
         [HttpPost("AdicionarPedido")]
-        public async Task<IActionResult> Create([FromBody] OrderDTO orderDto)
+        public async Task<IActionResult> Create([FromBody] OrderDTO orderDto, [FromHeader(Name = "User-Inclusion")] string userInclusion)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var orders = new Order
+            var newOrder = new Order
             {
                 OrderDate = orderDto.OrderDate,
                 ClientId = orderDto.ClientId,
-                PaymentStatusId = orderDto.PaymentStatusId
+                Payments = new List<Payment>(),
+                UserInclusion = userInclusion,
+                UserChange = userInclusion
             };
 
-            _context.Orders.Add(orders);
+            
+            foreach (OrderProductDTO i in orderDto.OrderItems)
+            {
+                var orderProduct = new OrderProduct
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    UnitPrice = i.UnitPrice,
+                    UserInclusion = userInclusion,
+                    UserChange = userInclusion
+
+                };
+
+                newOrder.OrderProducts.Add(orderProduct);
+            }
+
+            foreach (PaymentDTO i in orderDto.OrderPayments)
+            {
+                var orderPayment = new Payment
+                {
+                    Amount = i.Amount,
+                    DueDate = i.PaymentDate,
+                    PaymentStatus = PaymentStatus.Pendente,
+                    UserInclusion = userInclusion,
+                    UserChange = userInclusion
+
+                };
+
+                newOrder.Payments.Add(orderPayment);
+            }
+
+            _context.Orders.Add(newOrder);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = orders.OrderId }, orders);
+            return CreatedAtAction(nameof(GetById), new { id = newOrder.Id }, orderDto);
         }
 
         [HttpPut("AlterarPedido/{id}")]
@@ -71,7 +111,6 @@ namespace ControleDeEstoqueAPI.Controllers
 
             orders.OrderDate = orderDto.OrderDate;
             orders.ClientId = orderDto.ClientId;
-            orders.PaymentStatusId = orderDto.PaymentStatusId;
 
 
             try
@@ -80,7 +119,7 @@ namespace ControleDeEstoqueAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Orders.Any(e => e.OrderId == id))
+                if (!_context.Orders.Any(e => e.Id == id))
                 {
                     return NotFound();
                 }
