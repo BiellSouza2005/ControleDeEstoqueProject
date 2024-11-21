@@ -95,41 +95,66 @@ namespace ControleDeEstoqueAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = newOrder.Id }, orderDto);
         }
 
-        [HttpPut("AlterarPedido/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] OrderDTO orderDto)
+        [HttpPut("AtualizarPedido/{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] OrderDTO orderDto, [FromHeader(Name = "User-Inclusion")] string userChange)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var orders = await _context.Orders.FindAsync(id);
-            if (orders == null)
+            var existingOrder = await _context.Orders
+                .Include(o => o.OrderProducts)
+                .Include(o => o.Payments)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (existingOrder == null)
             {
-                return NotFound();
+                return NotFound($"Pedido com ID {id} não encontrado.");
             }
 
-            orders.OrderDate = orderDto.OrderDate;
-            orders.ClientId = orderDto.ClientId;
+            // Atualiza os campos principais do pedido
+            existingOrder.OrderDate = orderDto.OrderDate;
+            existingOrder.ClientId = orderDto.ClientId;
+            existingOrder.DateTimeChange = DateTime.UtcNow;
+            existingOrder.UserChange = userChange;
 
-
-            try
+            // Atualiza os produtos do pedido (OrderItems)
+            existingOrder.OrderProducts.Clear();
+            foreach (var item in orderDto.OrderItems)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Orders.Any(e => e.Id == id))
+                var orderProduct = new OrderProduct
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice,
+                    UserInclusion = existingOrder.UserInclusion,
+                    UserChange = userChange
+                };
+
+                existingOrder.OrderProducts.Add(orderProduct);
             }
 
-            return NoContent();
+            // Atualiza os pagamentos do pedido (OrderPayments)
+            existingOrder.Payments.Clear();
+            foreach (var payment in orderDto.OrderPayments)
+            {
+                var orderPayment = new Payment
+                {
+                    Amount = payment.Amount,
+                    DueDate = payment.PaymentDate, // Assumindo que o PaymentDate do DTO é o DueDate
+                    PaymentStatus = PaymentStatus.Pendente,
+                    UserInclusion = existingOrder.UserInclusion,
+                    UserChange = userChange
+                };
+
+                existingOrder.Payments.Add(orderPayment);
+            }
+
+            _context.Orders.Update(existingOrder);
+            await _context.SaveChangesAsync();
+
+            return Ok("Pedido atualizado com sucesso.");
         }
 
         [HttpDelete("DeletarPedido/{id}")]
