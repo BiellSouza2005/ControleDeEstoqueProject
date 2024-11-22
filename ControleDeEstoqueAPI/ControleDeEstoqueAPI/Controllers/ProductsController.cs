@@ -1,6 +1,7 @@
 ﻿using ControleDeEstoqueAPI.Data;
 using ControleDeEstoqueAPI.Data.DTOs.Brand;
 using ControleDeEstoqueAPI.Data.DTOs.Product;
+using ControleDeEstoqueAPI.Data.DTOs.User;
 using ControleDeEstoqueAPI.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,15 +22,51 @@ namespace ControleDeEstoqueAPI.Controllers
             _context = context;
         }
 
-        [HttpGet("VerProdutos")]
-        public IActionResult GetAll() =>
-            Ok(_context.Products.ToList());
-
-        [HttpGet("BuscarProduto/{id}")]
-        public IActionResult GetById(int id)
+        [HttpGet("VerProdutoPor/{id}")]
+        public async Task<ActionResult<ProductDTO>> GetProductById(int id)
         {
-            var product = _context.Products.Find(id);
-            return product == null ? NotFound() : Ok(product);
+            var product = await _context.Products
+                .Where(p => p.Id == id && !p.IsActive) // Filtra usuários com IsActive = false
+                .FirstOrDefaultAsync();
+
+            if (product == null)
+            {
+                return NotFound("Produto não encontrado ou não está inativo.");
+            }
+
+            var productDto = new ProductDTO
+            {
+                ProductId = product.Id,
+                Name = product.Name,
+                Price = product.Price,
+                BrandId = product.BrandId,
+                ProductTypeId = product.ProductTypeId 
+            };
+
+            return Ok(productDto);
+        }
+
+        [HttpGet("VerTodosProdutos")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAllProducts()
+        {
+            var products = await _context.Products
+                .Where(p => !p.IsActive) // Filtra apenas usuários com IsActive = false
+                .Select(p => new ProductDTO
+                {
+                    ProductId = p.Id,
+                    Name = p.Name,
+                    Price = p.Price,
+                    BrandId = p.BrandId,
+                    ProductTypeId = p.ProductTypeId
+                })
+                .ToListAsync();
+
+            if (!products.Any())
+            {
+                return NotFound("Nenhum produto inativo encontrado.");
+            }
+
+            return Ok(products);
         }
 
         [HttpPost("AdicionarProduto")]
@@ -53,62 +90,59 @@ namespace ControleDeEstoqueAPI.Controllers
 
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
         }
 
         [HttpPut("AlterarProduto/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ProductDTO productDto)
+        public async Task<IActionResult> Update(int id, [FromBody] ProductDTO productDto, [FromHeader(Name = "User-Inclusion")] string userChange)
         {
+            if (id != productDto.ProductId)
+            {
+                return BadRequest("ID do produto não corresponde.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var existingProduct = await _context.Products.FindAsync(id);
+
+            if (existingProduct == null)
             {
-                return NotFound();
+                return NotFound("Produto não encontrado.");
             }
 
-            product.Name = productDto.Name;
-            product.Price = productDto.Price;  
-            product.BrandId = productDto.BrandId;
-            product.ProductTypeId = productDto.ProductTypeId;
+            existingProduct.Name = productDto.Name;
+            existingProduct.Price = productDto.Price;
+            existingProduct.BrandId = productDto.BrandId;
+            existingProduct.DateTimeChange = DateTime.UtcNow;
+            existingProduct.UserChange = userChange;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Products.Any(e => e.Id == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            _context.Products.Update(existingProduct);
+            await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("Produto atualizado com sucesso.");
         }
 
         [HttpPut("AdicionarQuantidade/{id}/{quantidade}")]
-        public async Task<IActionResult> AddQuantity(int id, int quantidade)
+        public async Task<IActionResult> AddQuantity(int id, int quantidade, [FromHeader(Name = "User-Inclusion")] string userChange)
         {
             var product = await _context.Products.FindAsync(id);
 
             if (product == null) return NotFound("Produto não encontrado.");
 
             product.Quantity += quantidade;
+            product.IsActive = true;
+            product.DateTimeChange = DateTime.UtcNow;
+            product.UserChange = userChange;
             await _context.SaveChangesAsync();
 
             return Ok(product);
         }
 
         [HttpPut("SubtrairQuantidade/{id}/{quantidade}")]
-        public async Task<IActionResult> SubtractQuantity(int id, int quantidade)
+        public async Task<IActionResult> SubtractQuantity(int id, int quantidade, [FromHeader(Name = "User-Inclusion")] string userChange)
         {
             var product = await _context.Products.FindAsync(id);
 
@@ -120,6 +154,9 @@ namespace ControleDeEstoqueAPI.Controllers
             }
 
             product.Quantity -= quantidade;
+            product.IsActive = true;
+            product.DateTimeChange = DateTime.UtcNow;
+            product.UserChange = userChange;
             await _context.SaveChangesAsync();
 
             return Ok(product);
@@ -133,6 +170,26 @@ namespace ControleDeEstoqueAPI.Controllers
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("DesativarProduto/{id}")]
+        public async Task<IActionResult> Disable(int id, [FromHeader(Name = "User-Inclusion")] string userChange)
+        {
+            var product = await _context.Products.FindAsync(id);
+
+            if (product == null)
+            {
+                return NotFound($"Usuário com ID {id} não encontrado.");
+            }
+
+            product.IsActive = true;
+            product.DateTimeChange = DateTime.UtcNow;
+            product.UserChange = userChange;
+
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
     }

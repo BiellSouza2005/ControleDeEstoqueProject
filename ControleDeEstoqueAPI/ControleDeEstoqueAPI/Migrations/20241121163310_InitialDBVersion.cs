@@ -250,34 +250,6 @@ namespace ControleDeEstoqueAPI.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "PaymentHistories",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PaymentId = table.Column<int>(type: "int", nullable: false),
-                    PreviousAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    NewAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    ModificationDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
-                    DateTimeInclusion = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
-                    UserInclusion = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: false),
-                    DateTimeChange = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserChange = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    PaymentOrderId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentHistories", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PaymentHistories_Payments_PaymentOrderId_PaymentId",
-                        columns: x => new { x.PaymentOrderId, x.PaymentId },
-                        principalTable: "Payments",
-                        principalColumns: new[] { "OrderId", "Id" },
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_OrderProducts_ProductId",
                 table: "OrderProducts",
@@ -287,11 +259,6 @@ namespace ControleDeEstoqueAPI.Migrations
                 name: "IX_Orders_ClientId",
                 table: "Orders",
                 column: "ClientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PaymentHistories_PaymentOrderId_PaymentId",
-                table: "PaymentHistories",
-                columns: new[] { "PaymentOrderId", "PaymentId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductDescriptions_ProductId",
@@ -320,7 +287,7 @@ namespace ControleDeEstoqueAPI.Migrations
                 name: "OrderProducts");
 
             migrationBuilder.DropTable(
-                name: "PaymentHistories");
+                name: "Payments");
 
             migrationBuilder.DropTable(
                 name: "ProductDescriptions");
@@ -329,22 +296,19 @@ namespace ControleDeEstoqueAPI.Migrations
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Payments");
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "Products");
 
             migrationBuilder.DropTable(
-                name: "Orders");
+                name: "Clients");
 
             migrationBuilder.DropTable(
                 name: "Brands");
 
             migrationBuilder.DropTable(
                 name: "ProductTypes");
-
-            migrationBuilder.DropTable(
-                name: "Clients");
         }
     }
 }

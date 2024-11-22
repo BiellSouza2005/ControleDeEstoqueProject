@@ -1,6 +1,5 @@
 ﻿using ControleDeEstoqueAPI.Data.DTOs.OrderProduct;
 using ControleDeEstoqueAPI.Data.DTOs.Payment;
-using ControleDeEstoqueAPI.Data.DTOs.PaymentHistory;
 using ControleDeEstoqueAPI.Entities;
 
 namespace ControleDeEstoqueAPI.Data.DTOs.Order
@@ -14,6 +13,5 @@ namespace ControleDeEstoqueAPI.Data.DTOs.Order
 
         public ICollection<PaymentDTO> OrderPayments { get; set; }
 
-        public ICollection<PaymentHistoryDTO> PaymentsHistory { get; set; }
     }
 }

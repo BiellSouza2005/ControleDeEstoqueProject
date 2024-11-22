@@ -18,6 +18,5 @@
         public string UserChange { get; set; }
         public bool IsActive { get; set; }
         public int OrderId { get; set; }
-        public ICollection<PaymentHistory> PaymentHistories { get; set; }
     }
 }

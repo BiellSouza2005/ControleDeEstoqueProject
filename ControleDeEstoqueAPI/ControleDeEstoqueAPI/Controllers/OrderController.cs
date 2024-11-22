@@ -26,21 +26,30 @@ namespace ControleDeEstoqueAPI.Controllers
         }
 
         [HttpGet("VerPedidos")]
-        public IActionResult GetAll() {
+        public IActionResult GetAll()
+        {
             var orders = _context.Orders
+                .Where(o => !o.IsActive) // Filtra apenas os pedidos ativos
                 .Include(op => op.OrderProducts)
                     .ThenInclude(pr => pr.Product)
-                .Include(p => p.Payments).ToList();
+                .Include(p => p.Payments)
+                .ToList();
 
-            return orders == null ? NotFound() : Ok(orders);
+            return orders == null || !orders.Any() ? NotFound("Nenhum pedido ativo encontrado.") : Ok(orders);
         }
 
         [HttpGet("BuscarPedido/{id}")]
         public IActionResult GetById(int id)
         {
-            var orders = _context.Orders.Find(id);
-            return orders == null ? NotFound() : Ok(orders);
+            var order = _context.Orders
+                .Include(op => op.OrderProducts)
+                    .ThenInclude(pr => pr.Product)
+                .Include(p => p.Payments)
+                .FirstOrDefault(o => o.Id == id && !o.IsActive); // Filtra pelo ID e IsActive
+
+            return order == null ? NotFound($"Pedido com ID {id} não encontrado ou está inativo.") : Ok(order);
         }
+
 
         [HttpPost("AdicionarPedido")]
         public async Task<IActionResult> Create([FromBody] OrderDTO orderDto, [FromHeader(Name = "User-Inclusion")] string userInclusion)
@@ -113,13 +122,11 @@ namespace ControleDeEstoqueAPI.Controllers
                 return NotFound($"Pedido com ID {id} não encontrado.");
             }
 
-            // Atualiza os campos principais do pedido
             existingOrder.OrderDate = orderDto.OrderDate;
             existingOrder.ClientId = orderDto.ClientId;
             existingOrder.DateTimeChange = DateTime.UtcNow;
             existingOrder.UserChange = userChange;
 
-            // Atualiza os produtos do pedido (OrderItems)
             existingOrder.OrderProducts.Clear();
             foreach (var item in orderDto.OrderItems)
             {
@@ -135,7 +142,6 @@ namespace ControleDeEstoqueAPI.Controllers
                 existingOrder.OrderProducts.Add(orderProduct);
             }
 
-            // Atualiza os pagamentos do pedido (OrderPayments)
             existingOrder.Payments.Clear();
             foreach (var payment in orderDto.OrderPayments)
             {
@@ -157,14 +163,23 @@ namespace ControleDeEstoqueAPI.Controllers
             return Ok("Pedido atualizado com sucesso.");
         }
 
-        [HttpDelete("DeletarPedido/{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("DesativarPedido/{id}")]
+        public async Task<IActionResult> Disable(int id, [FromHeader(Name = "User-Inclusion")] string userChange)
         {
-            var orders = _context.Orders.Find(id);
-            if (orders == null) return NotFound();
+            var order = await _context.Orders.FindAsync(id);
 
-            _context.Orders.Remove(orders);
+            if (order == null)
+            {
+                return NotFound($"Pedido com ID {id} não encontrado.");
+            }
+
+            order.IsActive = true;
+            order.DateTimeChange = DateTime.UtcNow;
+            order.UserChange = userChange;
+
+            _context.Orders.Update(order);
             await _context.SaveChangesAsync();
+
             return NoContent();
         }
     }

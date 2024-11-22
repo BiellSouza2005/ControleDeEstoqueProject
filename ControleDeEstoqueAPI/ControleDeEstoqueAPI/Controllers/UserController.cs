@@ -24,10 +24,13 @@ public class UserController : ControllerBase
     [HttpGet("VerUsuarioPor/{id}")]
     public async Task<ActionResult<UserDTO>> GetUserById(int id)
     {
-        var user = await _context.Users.FindAsync(id);
+        var user = await _context.Users
+            .Where(u => u.Id == id && !u.IsActive) // Filtra usuários com IsActive = false
+            .FirstOrDefaultAsync();
+
         if (user == null)
         {
-            return NotFound("Usuário não encontrado.");
+            return NotFound("Usuário não encontrado ou não está inativo.");
         }
 
         var userDto = new UserDTO
@@ -45,6 +48,7 @@ public class UserController : ControllerBase
     public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
     {
         var users = await _context.Users
+            .Where(u => !u.IsActive) // Filtra apenas usuários com IsActive = false
             .Select(u => new UserDTO
             {
                 UserId = u.Id,
@@ -54,11 +58,16 @@ public class UserController : ControllerBase
             })
             .ToListAsync();
 
+        if (!users.Any())
+        {
+            return NotFound("Nenhum usuário inativo encontrado.");
+        }
+
         return Ok(users);
     }
 
     [HttpPost("AdicionarUsuario")]
-    public async Task<IActionResult> AddUser(UserRegistrationDTO userDto)
+    public async Task<IActionResult> AddUser([FromBody] UserRegistrationDTO userDto, [FromHeader(Name = "User-Inclusion")] string userInclusion)
     {
         var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
         if (existingUser != null)
@@ -70,7 +79,9 @@ public class UserController : ControllerBase
         {
             Name = userDto.Name,
             Email = userDto.Email,
-            Password = userDto.Password
+            Password = userDto.Password,
+            UserInclusion = userInclusion,
+            UserChange = userInclusion
         };
 
         _context.Users.Add(user);
@@ -78,29 +89,36 @@ public class UserController : ControllerBase
 
         return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, userDto);
     }
-
     [HttpPut("AtualizarUsuario/{id}")]
-    public async Task<IActionResult> UpdateUser(int id, UserDTO userDto)
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDTO userDto, [FromHeader(Name = "User-Inclusion")] string userChange)
     {
         if (id != userDto.UserId)
         {
             return BadRequest("ID do usuário não corresponde.");
         }
 
-        var user = await _context.Users.FindAsync(id);
-        if (user == null)
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var existingUser = await _context.Users.FindAsync(id);
+
+        if (existingUser == null)
         {
             return NotFound("Usuário não encontrado.");
         }
 
-        user.Name = userDto.Name;
-        user.Email = userDto.Email;
-        user.Password = userDto.Password;
+        existingUser.Name = userDto.Name;
+        existingUser.Email = userDto.Email;
+        existingUser.Password = userDto.Password;
+        existingUser.DateTimeChange = DateTime.UtcNow; 
+        existingUser.UserChange = userChange;        
 
-        _context.Users.Update(user);
+        _context.Users.Update(existingUser);
         await _context.SaveChangesAsync();
 
-        return NoContent();
+        return Ok("Usuário atualizado com sucesso.");
     }
 
     [HttpDelete("DeletarUsuario/{id}")]
@@ -113,6 +131,26 @@ public class UserController : ControllerBase
         }
 
         _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpDelete("DesativarUsuário/{id}")]
+    public async Task<IActionResult> Disable(int id, [FromHeader(Name = "User-Inclusion")] string userChange)
+    {
+        var user = await _context.Users.FindAsync(id);
+
+        if (user == null)
+        {
+            return NotFound($"Usuário com ID {id} não encontrado.");
+        }
+
+        user.IsActive = true;
+        user.DateTimeChange = DateTime.UtcNow;
+        user.UserChange = userChange;
+
+        _context.Users.Update(user);
         await _context.SaveChangesAsync();
 
         return NoContent();

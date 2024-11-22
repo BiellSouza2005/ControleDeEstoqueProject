@@ -19,7 +19,6 @@ namespace ControleDeEstoqueAPI.Data
         public DbSet<ProductType> ProductTypes { get; set; }
         public DbSet<ProductDescription> ProductDescriptions { get; set; }
         public DbSet<Payment> Payments { get; set; }
-        public DbSet<PaymentHistory> PaymentHistories { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Login> Logins { get; set; }
 
@@ -31,7 +30,6 @@ namespace ControleDeEstoqueAPI.Data
             modelBuilder.ApplyConfiguration(new OrderConfigurations());
             modelBuilder.ApplyConfiguration(new OrderProductConfigurations());
             modelBuilder.ApplyConfiguration(new PaymentConfigurations());
-            modelBuilder.ApplyConfiguration(new PaymentHistoryConfigurations());
             modelBuilder.ApplyConfiguration(new ProductConfigurations());
             modelBuilder.ApplyConfiguration(new ProductDescriptionConfigurations());
             modelBuilder.ApplyConfiguration(new ProductTypeConfigurations());

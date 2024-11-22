@@ -291,63 +291,6 @@ namespace ControleDeEstoqueAPI.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("ControleDeEstoqueAPI.Entities.PaymentHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DateTimeChange")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateTimeInclusion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<DateTime>("ModificationDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<decimal>("NewAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("PaymentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PaymentOrderId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("PreviousAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("UserChange")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<string>("UserInclusion")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PaymentOrderId", "PaymentId");
-
-                    b.ToTable("PaymentHistories");
-                });
-
             modelBuilder.Entity("ControleDeEstoqueAPI.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -576,17 +519,6 @@ namespace ControleDeEstoqueAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ControleDeEstoqueAPI.Entities.PaymentHistory", b =>
-                {
-                    b.HasOne("ControleDeEstoqueAPI.Entities.Payment", "Payment")
-                        .WithMany("PaymentHistories")
-                        .HasForeignKey("PaymentOrderId", "PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Payment");
-                });
-
             modelBuilder.Entity("ControleDeEstoqueAPI.Entities.Product", b =>
                 {
                     b.HasOne("ControleDeEstoqueAPI.Entities.Brand", "Brand")
@@ -630,11 +562,6 @@ namespace ControleDeEstoqueAPI.Migrations
                     b.Navigation("OrderProducts");
 
                     b.Navigation("Payments");
-                });
-
-            modelBuilder.Entity("ControleDeEstoqueAPI.Entities.Payment", b =>
-                {
-                    b.Navigation("PaymentHistories");
                 });
 
             modelBuilder.Entity("ControleDeEstoqueAPI.Entities.Product", b =>

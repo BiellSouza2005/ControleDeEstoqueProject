@@ -22,15 +22,47 @@ namespace ControleDeEstoqueAPI.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public IActionResult GetAll([FromHeader(Name = "User-Inclusion")] string userInclusion) =>
-            Ok(_context.Clients.ToList());
-
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id, [FromHeader(Name = "User-Inclusion")] string userInclusion)
+        [HttpGet("VerClientesPor/{id}")]
+        public async Task<ActionResult<ClientDTO>> GetClientsById(int id)
         {
-            var client = _context.Clients.Find(id);
-            return client == null ? NotFound() : Ok(client);
+            var client = await _context.Clients
+                .Where(c => c.Id == id && !c.IsActive) // Filtra usuários com IsActive = false
+                .FirstOrDefaultAsync();
+
+            if (client == null)
+            {
+                return NotFound("Cliente não encontrado ou não está inativa.");
+            }
+
+            var clientsDto = new ClientDTO
+            {
+                ClientId = client.Id,
+                Name = client.Name,
+                Email = client.Email
+            };
+
+            return Ok(clientsDto);
+        }
+
+        [HttpGet("VerTodosOsClientes")]
+        public async Task<ActionResult<IEnumerable<ClientDTO>>> GetAllBrands()
+        {
+            var client = await _context.Clients
+                .Where(c => !c.IsActive) // Filtra apenas usuários com IsActive = false
+                .Select(c => new ClientDTO
+                {
+                    ClientId = c.Id,
+                    Name = c.Name,
+                    Email = c.Email
+                })
+                .ToListAsync();
+
+            if (!client.Any())
+            {
+                return NotFound("Nenhum cliente inativo encontrado.");
+            }
+
+            return Ok(client);
         }
 
         [HttpPost("AdicionarCliente")]
@@ -55,39 +87,34 @@ namespace ControleDeEstoqueAPI.Controllers
         }
 
         [HttpPut("AlterarCliente/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ClientDTO clientsDto, [FromHeader(Name = "User-Inclusion")] string userInclusion)
+        public async Task<IActionResult> Update(int id, [FromBody] ClientDTO clientsDto, [FromHeader(Name = "User-Inclusion")] string userChange)
         {
+            if (id != clientsDto.ClientId)
+            {
+                return BadRequest("ID do CLiente não corresponde.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var client = await _context.Clients.FindAsync(id);
-            if (client == null)
+            var existingCLient = await _context.Clients.FindAsync(id);
+
+            if (existingCLient == null)
             {
-                return NotFound();
+                return NotFound("Usuário não encontrado.");
             }
 
-            client.Name = clientsDto.Name;
-            client.Email = clientsDto.Email;
+            existingCLient.Name = clientsDto.Name;
+            existingCLient.Email = clientsDto.Email;
+            existingCLient.DateTimeChange = DateTime.UtcNow;
+            existingCLient.UserChange = userChange;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Clients.Any(e => e.Id == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            _context.Clients.Update(existingCLient);
+            await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("Cliente atualizado com sucesso.");
         }
 
         [HttpDelete("DeletarCliente/{id}")]
@@ -98,6 +125,26 @@ namespace ControleDeEstoqueAPI.Controllers
 
             _context.Clients.Remove(client);
             await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("DesativarMarca/{id}")]
+        public async Task<IActionResult> Disable(int id, [FromHeader(Name = "User-Inclusion")] string userChange)
+        {
+            var client = await _context.Clients.FindAsync(id);
+
+            if (client == null)
+            {
+                return NotFound($"Marca com ID {id} não encontrado.");
+            }
+
+            client.IsActive = true;
+            client.DateTimeChange = DateTime.UtcNow;
+            client.UserChange = userChange;
+
+            _context.Clients.Update(client);
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
     }
