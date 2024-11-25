@@ -1,152 +1,107 @@
-﻿using ControleDeEstoqueAPI.Data;
-using ControleDeEstoqueAPI.Data.DTOs.Brand;
-using ControleDeEstoqueAPI.Data.DTOs.ProductType;
-using ControleDeEstoqueAPI.Entities;
+﻿using ControleDeEstoqueAPI.Data.DTOs.Brand;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ControleDeEstoqueAPI.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
     public class BrandsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IBrandRepository _repository;
 
-        public BrandsController(AppDbContext context)
+        public BrandsController(IBrandRepository repository)
         {
-            _context = context;
-        }
-
-        [HttpGet("VerMarcasPor/{id}")]
-        public async Task<ActionResult<BrandDTO>> GetBrandsById(int id)
-        {
-            var brand = await _context.Brands
-                .Where(b => b.Id == id && !b.IsActive) // Filtra usuários com IsActive = false
-                .FirstOrDefaultAsync();
-
-            if (brand == null)
-            {
-                return NotFound("Marca não encontrada ou não está inativa.");
-            }
-
-            var brandsDTO = new BrandDTO
-            {
-                BrandId = brand.Id,
-                Name = brand.Name
-            };
-
-            return Ok(brandsDTO);
-        }
-
-        [HttpGet("VerTodosOsTiposDeProduto")]
-        public async Task<ActionResult<IEnumerable<BrandDTO>>> GetAllBrands()
-        {
-            var brand = await _context.Brands
-                .Where(b => !b.IsActive) // Filtra apenas usuários com IsActive = false
-                .Select(b => new BrandDTO
-                {
-                    BrandId = b.Id,
-                    Name = b.Name
-                })
-                .ToListAsync();
-
-            if (!brand.Any())
-            {
-                return NotFound("Nenhum tipo de produto inativo encontrado.");
-            }
-
-            return Ok(brand);
+            _repository = repository;
         }
 
         [HttpPost("AdicionaMarca")]
-        public async Task<IActionResult> AdicionaMarca([FromBody] BrandDTO brandDto, [FromHeader(Name = "User-Inclusion")] string userInclusion)
+        public async Task<IActionResult> AddBrand([FromBody] BrandDTO brandDto, [FromHeader(Name = "User-Inclusion")] string userInclusion)
         {
             if (string.IsNullOrEmpty(brandDto.Name))
             {
                 return BadRequest("O nome da marca é obrigatório.");
             }
 
-            var existingBrand = _context.Brands.FirstOrDefault(b => b.Name == brandDto.Name);
-            if (existingBrand != null)
+            var createdBrand = await _repository.AddBrandAsync(brandDto, userInclusion);
+            if (createdBrand == null)
             {
                 return Conflict("A marca já existe.");
             }
 
-            var brand = new Brand
-            {
-                Name = brandDto.Name,
-                UserInclusion = userInclusion,
-                UserChange = userInclusion
-            };
-
-            _context.Brands.Add(brand);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(AdicionaMarca), new { id = brand.Id }, brand);
+            return CreatedAtAction(nameof(GetBrandById), new { id = createdBrand.Id }, createdBrand);
         }
 
         [HttpPut("MudaMarca/{id}")]
-        public async Task<IActionResult> UpdateBrand(int id, [FromBody] BrandDTO brandDTO, [FromHeader(Name = "User-Inclusion")] string userChange)
+        public async Task<IActionResult> UpdateBrand(int id, [FromBody] BrandDTO brandDto, [FromHeader(Name = "User-Inclusion")] string userChange)
         {
-            if (id != brandDTO.BrandId)
+            if (id != brandDto.BrandId)
             {
                 return BadRequest("ID da marca não corresponde.");
             }
 
-            if (!ModelState.IsValid)
+            var updatedBrand = await _repository.UpdateBrandAsync(id, brandDto, userChange);
+            if (updatedBrand == null)
             {
-                return BadRequest(ModelState);
+                return NotFound("Marca não encontrada.");
             }
-
-            var existingBrand = await _context.Brands.FindAsync(id);
-
-            if (existingBrand == null)
-            {
-                return NotFound("Usuário não encontrado.");
-            }
-
-            existingBrand.Name = brandDTO.Name;
-            existingBrand.DateTimeChange = DateTime.UtcNow;
-            existingBrand.UserChange = userChange;
-
-            _context.Brands.Update(existingBrand);
-            await _context.SaveChangesAsync();
 
             return Ok("Marca atualizada com sucesso.");
         }
 
-        [HttpDelete("DeletaMarca/{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpGet("VerMarcasPor/{id}")]
+        public async Task<ActionResult<BrandDTO>> GetBrandById(int id)
         {
-            var brand = _context.Brands.Find(id);
-            if (brand == null) return NotFound();
+            var brand = await _repository.GetBrandByIdAsync(id);
+            if (brand == null)
+            {
+                return NotFound("Marca não encontrada ou não está inativa.");
+            }
 
-            _context.Brands.Remove(brand);
-            await _context.SaveChangesAsync();
+            var brandDto = new BrandDTO
+            {
+                BrandId = brand.Id,
+                Name = brand.Name
+            };
+
+            return Ok(brandDto);
+        }
+
+        [HttpGet("VerTodosOsTiposDeProduto")]
+        public async Task<ActionResult<IEnumerable<BrandDTO>>> GetAllBrands()
+        {
+            var brands = await _repository.GetAllInactiveBrandsAsync();
+            if (brands == null || !brands.Any())
+            {
+                return NotFound("Nenhuma marca inativa encontrada.");
+            }
+
+            return Ok(brands);
+        }
+
+        [HttpDelete("DeletaMarca/{id}")]
+        public async Task<IActionResult> DeleteBrand(int id)
+        {
+            var success = await _repository.DeleteBrandAsync(id);
+            if (!success)
+            {
+                return NotFound("Marca não encontrada.");
+            }
+
             return NoContent();
         }
 
         [HttpDelete("DesativarMarca/{id}")]
-        public async Task<IActionResult> Disable(int id, [FromHeader(Name = "User-Inclusion")] string userChange)
+        public async Task<IActionResult> DisableBrand(int id, [FromHeader(Name = "User-Inclusion")] string userChange)
         {
-            var brand = await _context.Brands.FindAsync(id);
-
-            if (brand == null)
+            var success = await _repository.DisableBrandAsync(id, userChange);
+            if (!success)
             {
-                return NotFound($"Marca com ID {id} não encontrado.");
+                return NotFound($"Marca com ID {id} não encontrada.");
             }
-
-            brand.IsActive = true;
-            brand.DateTimeChange = DateTime.UtcNow;
-            brand.UserChange = userChange;
-
-            _context.Brands.Update(brand);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
     }
-
 }
