@@ -83,7 +83,7 @@ namespace ControleDeEstoqueAPI.Controllers
 
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = client.Id }, client);
+            return CreatedAtAction(nameof(GetClientsById), new { id = client.Id }, client);
         }
 
         [HttpPut("AlterarCliente/{id}")]
