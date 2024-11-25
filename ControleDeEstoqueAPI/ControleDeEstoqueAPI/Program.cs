@@ -1,4 +1,6 @@
 using ControleDeEstoqueAPI.Data;
+using ControleDeEstoqueAPI.Repositories;
+
 //using ControleDeEstoqueAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +11,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProductTypeRepository, ProductTypeRepository>();
 
 builder.Services.AddControllers();
 
