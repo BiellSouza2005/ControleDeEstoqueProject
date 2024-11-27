@@ -77,6 +77,7 @@ namespace ControleDeEstoqueAPI.Repositories
             {
                 OrderDate = orderDto.OrderDate,
                 ClientId = orderDto.ClientId,
+                Payments = new List<Payment>(),
                 UserInclusion = userInclusion,
                 UserChange = userInclusion
             };

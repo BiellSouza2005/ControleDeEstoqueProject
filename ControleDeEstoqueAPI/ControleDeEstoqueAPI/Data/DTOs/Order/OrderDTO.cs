@@ -11,7 +11,6 @@ namespace ControleDeEstoqueAPI.Data.DTOs.Order
         public int ClientId { get; set; }
 
         public ICollection<OrderProductDTO> OrderItems { get; set; }
-
         public ICollection<PaymentDTO> OrderPayments { get; set; }
 
     }
