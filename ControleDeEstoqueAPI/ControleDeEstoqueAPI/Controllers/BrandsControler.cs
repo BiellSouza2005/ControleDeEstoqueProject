@@ -68,7 +68,7 @@ namespace ControleDeEstoqueAPI.Controllers
             return Ok(brandDto);
         }
 
-        [HttpGet("VerTodosOsTiposDeProduto")]
+        [HttpGet("VerTodasAsMarcas")]
         public async Task<ActionResult<IEnumerable<BrandDTO>>> GetAllBrands()
         {
             var brands = await _repository.GetAllInactiveBrandsAsync();
