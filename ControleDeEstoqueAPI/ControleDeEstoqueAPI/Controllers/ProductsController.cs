@@ -51,7 +51,7 @@ namespace ControleDeEstoqueAPI.Controllers
         }
 
         [HttpPut("AlterarProduto/{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ProductDTO productDto, [FromHeader(Name = "User-Inclusion")] string userChange)
+        public async Task<IActionResult> Update(int id, [FromBody] ProductWhithoutQntDTO productDto, [FromHeader(Name = "User-Inclusion")] string userChange)
         {
             if (id != productDto.ProductId)
                 return BadRequest("ID do produto não corresponde.");

@@ -8,7 +8,7 @@ namespace ControleDeEstoqueAPI.Repositories
         Task<Product> GetProductByIdAsync(int id);
         Task<IEnumerable<ProductDTO>> GetAllInactiveProductsAsync();
         Task<Product> AddProductAsync(ProductDTO productDto, string userInclusion);
-        Task<Product> UpdateProductAsync(int id, ProductDTO productDto, string userChange);
+        Task<Product> UpdateProductAsync(int id, ProductWhithoutQntDTO productDto, string userChange);
         Task<Product> AddQuantityAsync(int id, int quantity, string userChange);
         Task<Product> SubtractQuantityAsync(int id, int quantity, string userChange);
         Task<bool> DeleteProductAsync(int id);
