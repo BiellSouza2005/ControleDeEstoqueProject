@@ -34,6 +34,7 @@ namespace ControleDeEstoqueAPI.Repositories
                     ProductId = p.Id,
                     Name = p.Name,
                     Price = p.Price,
+                    Quantity = p.Quantity,
                     BrandId = p.BrandId,
                     ProductTypeId = p.ProductTypeId
                 })
@@ -46,6 +47,7 @@ namespace ControleDeEstoqueAPI.Repositories
             {
                 Name = productDto.Name,
                 Price = productDto.Price,
+                Quantity = productDto.Quantity,
                 BrandId = productDto.BrandId,
                 ProductTypeId = productDto.ProductTypeId,
                 UserInclusion = userInclusion,
@@ -57,7 +59,7 @@ namespace ControleDeEstoqueAPI.Repositories
             return product;
         }
 
-        public async Task<Product> UpdateProductAsync(int id, ProductDTO productDto, string userChange)
+        public async Task<Product> UpdateProductAsync(int id, ProductWhithoutQntDTO productDto, string userChange)
         {
             var product = await _context.Products.FindAsync(id);
 
